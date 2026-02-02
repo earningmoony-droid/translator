@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Translator Pro - Firebase</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+      import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+      // আপনার দেওয়া কনফিগুরেশন
+      const firebaseConfig = {
+        apiKey: "AIzaSyDyT_b5SsAVtgepGOO3ZTohYeAr9eT62cs",
+        authDomain: "ai-translator-pro-b47df.firebaseapp.com",
+        projectId: "ai-translator-pro-b47df",
+        storageBucket: "ai-translator-pro-b47df.firebasestorage.app",
+        messagingSenderId: "385882755630",
+        appId: "1:385882755630:web:b7efe457f603095a73c5bf"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // এডমিন প্যানেল থেকে ডাটা আনার ফাংশন (ভবিষ্যতের জন্য)
+      async function loadRemoteConfig() {
+        try {
+          const docRef = doc(db, "settings", "appConfig");
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+             console.log("Remote config loaded:", docSnap.data());
+             // এখান থেকে আপনি অ্যাড কোড বা ল্যাঙ্গুয়েজ আপডেট করতে পারবেন
+          }
+        } catch(e) { console.log("No remote config yet."); }
+      }
+      loadRemoteConfig();
+    </script>
+
+    <style>
+        /* আগের সেই গ্লাস থিম এখানে থাকবে */
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --neon-cyan: #00f2fe;
+            --main-bg: #0a0a0b;
+        }
+        body {
+            margin: 0; font-family: 'Segoe UI', sans-serif;
+            background: radial-gradient(circle, #1a1a2e, #0a0a0b);
+            color: white; min-height: 100vh;
+        }
+        .app-header {
+            padding: 20px; text-align: center; font-weight: bold;
+            letter-spacing: 2px; border-bottom: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+        .container { padding: 20px; max-width: 500px; margin: 0 auto; }
+        .glass-card {
+            background: var(--glass-bg); backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            padding: 20px; margin-bottom: 20px;
+        }
+        textarea, select {
+            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
+            color: white; padding: 12px; border-radius: 10px; margin-top: 10px; outline: none;
+        }
+        .btn-translate {
+            width: 100%; padding: 15px; border-radius: 10px; border: none;
+            background: linear-gradient(45deg, #00f2fe, #4facfe);
+            color: #000; font-weight: bold; cursor: pointer; margin-top: 15px;
+        }
+        .ad-space {
+            margin-top: 30px; border: 1px dashed #555; padding: 10px; text-align: center;
+            font-size: 12px; color: #888;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-header">AI TRANSLATOR PRO</div>
+
+<div class="container">
+    <div class="glass-card">
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button id="girlBtn" style="flex:1; padding:10px; border-radius:8px; border:none; background:var(--neon-cyan);" onclick="setVoice('female')">Girl AI</button>
+            <button id="boyBtn" style="flex:1; padding:10px; border-radius:8px; border:none; background:rgba(255,255,255,0.1); color:white;" onclick="setVoice('male')">Boy AI</button>
+        </div>
+
+        <select id="fromLang">
+            <option value="bn">Bengali</option>
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+        </select>
+        
+        <textarea id="inputText" rows="4" placeholder="Type here..."></textarea>
+        
+        <select id="toLang">
+            <option value="en">English</option>
+            <option value="bn">Bengali</option>
+            <option value="ar">Arabic</option>
+        </select>
+
+        <button class="btn-translate" onclick="translateNow()">TRANSLATE AI</button>
+    </div>
+
+    <div class="glass-card">
+        <div style="display:flex; justify-content:space-between;">
+            <small>RESULT</small>
+            <i class="fas fa-volume-up" style="cursor:pointer" onclick="speakResult()"></i>
+        </div>
+        <div id="outputText" style="margin-top:15px; font-size:1.2rem; color:var(--neon-cyan);">...</div>
+    </div>
+
+    <div class="ad-space">
+        <div id="pjok-ads">
+            <p>ADVERTISEMENT AREA</p>
+            </div>
+    </div>
+</div>
+
+<script>
+    let currentGender = 'female';
+
+    function setVoice(g) {
+        currentGender = g;
+        document.getElementById('girlBtn').style.background = g === 'female' ? '#00f2fe' : 'rgba(255,255,255,0.1)';
+        document.getElementById('boyBtn').style.background = g === 'male' ? '#00f2fe' : 'rgba(255,255,255,0.1)';
+    }
+
+    async function translateNow() {
+        const text = document.getElementById('inputText').value;
+        const from = document.getElementById('fromLang').value;
+        const to = document.getElementById('toLang').value;
+        const output = document.getElementById('outputText');
+
+        if(!text) return;
+        output.innerText = "Thinking...";
+
+        try {
+            const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`);
+            const data = await res.json();
+            output.innerText = data.responseData.translatedText;
+        } catch(e) { output.innerText = "Error!"; }
+    }
+
+    function speakResult() {
+        const text = document.getElementById('outputText').innerText;
+        const speech = new SpeechSynthesisUtterance(text);
+        speech.lang = document.getElementById('toLang').value;
+        speech.pitch = currentGender === 'female' ? 1.2 : 0.8;
+        window.speechSynthesis.speak(speech);
+    }
+</script>
+
+</body>
+</html>
